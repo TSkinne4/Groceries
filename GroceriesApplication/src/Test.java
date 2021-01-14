@@ -9,7 +9,9 @@ public class Test {
 		ArrayList<RoomMate> list = new ArrayList<RoomMate>();
 		try {
 			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File("C:/Users/trist/Documents/GitHub/Groceries/GroceriesApplication/RoomateInformationFile")));
+			ObjectOutputStream oos2 = new ObjectOutputStream(new FileOutputStream(new File("C:/Users/trist/Documents/GitHub/Groceries/GroceriesApplication/DebtsInformationFile")));
 			oos.writeObject(list);
+			oos2.writeObject(new double[1][1]);
 		} catch (IOException e) {
 			System.out.print("Error");
 		}

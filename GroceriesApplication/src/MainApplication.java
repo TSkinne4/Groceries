@@ -10,6 +10,8 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -17,6 +19,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextArea;
@@ -90,7 +93,7 @@ public class MainApplication extends Application{
 		
 		VBox result = new VBox();
 		Button addRoomateButton = new Button("Add roomate"), addContributionButton = new Button("Calculate totals"), saveButton = new Button("Save");
-		Button infoButton = new  Button("Add Contribution"), customButton = new Button("Set custom portions");
+		Button infoButton = new  Button("Add Contribution"), customButton = new Button("Set custom portions"), paymentButton = new Button("Make Payment");
 		
 		
 		
@@ -99,7 +102,8 @@ public class MainApplication extends Application{
 		infoButton.setOnAction(e-> stage.setScene(new Scene( new EditRoomateScreen(-1))));
 		customButton.setOnAction(e->stage.setScene(new Scene(setCustomPortions())));
 		addContributionButton.setOnAction(e->stage.setScene(new Scene(calculateTotals())));
-		result.getChildren().addAll(mainTitle, infoButton ,addRoomateButton, customButton ,addContributionButton, saveButton);
+		paymentButton.setOnAction(e-> stage.setScene(new Scene(makePaymentScreen())));
+		result.getChildren().addAll(mainTitle, infoButton ,addRoomateButton, customButton ,addContributionButton, paymentButton, saveButton);
 		result.setSpacing(10);
 		result.setPadding(new Insets(10));
 		return result;
@@ -224,8 +228,55 @@ public class MainApplication extends Application{
 		});
 		textArea.setEditable(false);
 		result.getChildren().addAll(textArea, addNewDebtsButton,menuButton);
+		result.setSpacing(10);
+		result.setPadding(new Insets(10));
 		return result;
 	}
+	
+	VBox makePaymentScreen() {
+		
+		TextArea debtInformation = new TextArea();
+		TextField paymentField = new TextField();
+		Button makePaymentButton = new Button("Make Payment");
+		
+		VBox result = new VBox();
+		ChoiceBox<String> payerChoice = new ChoiceBox<String>() , recieverChoice = new ChoiceBox<String>();
+		ArrayList<String> namesList = new ArrayList<String>();
+		for(RoomMate mate:matesList)
+			namesList.add(mate.getName());
+		payerChoice.setItems(FXCollections.observableList(namesList));
+		recieverChoice.setItems(FXCollections.observableList(namesList));
+		payerChoice.getSelectionModel().selectedIndexProperty().addListener(
+				new ChangeListener<Number>() {
+					@Override
+					public void changed(ObservableValue<? extends Number> arg0, Number arg1, Number arg2) {
+						debtInformation.setText(formatPersonalDebt(arg2.intValue()));
+					}
+				});
+		
+		makePaymentButton.setOnAction(e -> {
+			int payerIndex = payerChoice.getSelectionModel().getSelectedIndex(), recieverIndex = recieverChoice.getSelectionModel().getSelectedIndex();
+			if (payerIndex == -1 || recieverIndex == -1) 
+				alertText.setText("Please fill all fields");
+			else if(payerIndex == recieverIndex)
+				alertText.setText("You must enter two different people");
+			else {
+				try {
+				debtsInformationArray[recieverIndex][payerIndex] += Double.parseDouble(paymentField.getText());
+				alertText.setText("Payment succesfully processed");
+				debtsInformationArray = normalizeArray(debtsInformationArray);
+				debtInformation.setText(formatPersonalDebt(payerIndex));
+				} catch(NumberFormatException ex) {alertText.setText("Entered payment invalid");}
+			}
+		});
+		
+		result.getChildren().addAll(debtInformation, alertText , new Text("Who is paying:"),payerChoice,new Text("Who is being payed:")
+				,recieverChoice,new Text("How much is being payed:"),paymentField, makePaymentButton ,menuButton);
+		result.setSpacing(10);
+		result.setPadding(new Insets(10));
+		return result;
+	}
+	
 	
 	double[][] createPaymentArray(){
 		double[][] result = new double[matesList.size()][matesList.size()];

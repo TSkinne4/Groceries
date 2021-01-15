@@ -5,10 +5,10 @@ INDEX VERSION 1.131+C:\Users\trist\Documents\GitHub\Groceries\.metadata\.plugins
 2474721738.index
 3815993054.index
 264584310.index
-3936068860.index
-898576081.index
-1931552977.index
 1508355318.index
+3936068860.index
+1931552977.index
+898576081.index
 2320437956.index
 372573395.index
 2249317007.index
